@@ -1,25 +1,33 @@
-# Equacao
-module PVC
-    export fy, h_linha, h, r, k, t_a, t_b, t_inf, L
+module PVCClass
+    export PVC, pvc_solution
 
-    # dados do problema
-    h_linha = 0.05 # m^-2
-    h = 1 # J/m^2*Ks
-    r = 0.2 # m
-    k = 200 # J/(mks)
-    t_inf = 200 # kelvin
-    t_a = 243 # kelvin
-    t_b = 400 # kelvin
-    L = 10 # m
+    struct PVC
+        h_linha::Float32
+        h::Float32
+        r::Float32
+        k::Float32
+        t_inf::Float32
+        t_a::Float32
+        t_b::Float32
+        L::Float32
+        delta_x::Float32
+        x::Array
+    end
 
     # Solucao analitica
-    function fy(x)
-        lambda = sqrt(h_linha)
+    function pvc_solution(pvc::PVC)
+        lambda = sqrt(pvc.h_linha)
 
-        A = ((t_a - t_inf)*MathConstants.e^(-lambda*L) - (t_b - t_inf)) / (MathConstants.e^(-lambda*L) - MathConstants.e^(lambda*L))
-        B = ((t_b - t_inf) - (t_a - t_inf)*MathConstants.e^(lambda*L)) / (MathConstants.e^(-lambda*L) - MathConstants.e^(lambda*L))
+        A = ((pvc.t_a - pvc.t_inf)*MathConstants.e^(-lambda*pvc.L) - (pvc.t_b - pvc.t_inf)) / (MathConstants.e^(-lambda*pvc.L) - MathConstants.e^(lambda*pvc.L))
+        B = ((pvc.t_b - pvc.t_inf) - (pvc.t_a - pvc.t_inf)*MathConstants.e^(lambda*pvc.L)) / (MathConstants.e^(-lambda*pvc.L) - MathConstants.e^(lambda*pvc.L))
 
-        y = t_inf + A * MathConstants.e^(lambda*x) + B * MathConstants.e^(-lambda*x)
+        N = length(pvc.x)
+        y = Array{Float64, 1}(undef, N)
+        for i in 2:N-1
+            y[i] = pvc.t_inf + A * MathConstants.e^(lambda*pvc.x[i]) + B * MathConstants.e^(-lambda*pvc.x[i])
+        end
+        y[1] = pvc.t_a
+        y[N] = pvc.t_b
         return y
     end
 end
