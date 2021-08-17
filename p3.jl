@@ -2,7 +2,7 @@ using Plots
 using JSON
 include("./metodos.jl")
 import .Metodos
-include("./pvc2.jl")
+include("./pvc.jl")
 using .PVCClass
 
 function readJSON(_filename::String)
